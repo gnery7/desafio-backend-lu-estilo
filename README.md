@@ -92,7 +92,3 @@ Todos os testes devem passar sem warnings, com cobertura de:
 ## 📅 Última atualização
 
 24/05/2025
-
----
-
-Feito com 💻 por [Seu Nome]
