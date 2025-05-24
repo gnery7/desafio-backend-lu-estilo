@@ -51,7 +51,6 @@ Este projeto é uma API de controle de clientes, produtos e pedidos para a loja 
 1. Clone o repositório:
 ```bash
 git clone https://github.com/gnery7/desafio_lu_estilo.git
-mv desafio_lu_estilo-main desafio_lu_estilo
 cd desafio_lu_estilo
 ```
 
@@ -140,7 +139,6 @@ Você pode executar o projeto usando **Docker** para facilitar a instalação e 
 1. Clone o repositório:
 ```bash
 git clone https://github.com/gnery7/desafio_lu_estilo.git
-mv desafio_lu_estilo-main desafio_lu_estilo
 cd desafio_lu_estilo
 ```
 
