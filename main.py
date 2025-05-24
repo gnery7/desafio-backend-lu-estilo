@@ -1,11 +1,14 @@
 from fastapi import FastAPI, Depends, HTTPException, status, Query
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from sqlalchemy.orm import Session
+from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from typing import Optional, List
 import jwt
 import httpx
-from desafio_lu_estilo.database import SessionLocal, get_db
-from sqlalchemy.orm import Session
+from desafio_lu_estilo.database import SessionLocal, get_db, Base, engine
 from desafio_lu_estilo.models import (
     ClientORM, ProductORM, OrderORM, OrderProductORM,
     User, Token, Client, ClientCreate, Product, ProductCreate, 
@@ -13,6 +16,7 @@ from desafio_lu_estilo.models import (
 )
 
 # Configurações
+Base.metadata.create_all(bind=engine)
 SECRET_KEY = "lu_estilo_secret_key_123"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -20,8 +24,21 @@ WHATSAPP_API_URL = "https://api.fakewhatsapp.com/send"
 WHATSAPP_API_KEY = "fake-api-key"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
+
 # Inicialização
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # ou ["http://127.0.0.1:8000"] para mais segurança
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.mount(
+    "/static",
+    StaticFiles(directory=Path(__file__).parent / "static"),
+    name="static"
+)
 
 # Mock de usuários
 users_db = {
