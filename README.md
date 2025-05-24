@@ -6,7 +6,7 @@ API RESTful construída com **FastAPI**, **SQLAlchemy** e **Pydantic v2**, com a
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.95+-success)
-![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
+![Status](https://img.shields.io/badge/status-finalizado-green)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ---
@@ -119,26 +119,29 @@ Os testes cobrem:
 
 ---
 
-## 🛡️ Licença
+## 🐳 Deploy com Docker
 
-Este projeto está sob licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+Você pode executar o projeto usando **Docker** para facilitar a instalação e garantir um ambiente padronizado.
 
----
+### 📦 Pré-requisitos
+- [Docker](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
 
-## 🤝 Contribuindo
+### ▶️ Passos para rodar:
 
-Pull requests são bem-vindos! Para melhorias ou correções:
+1. Clone o repositório:
+```bash
+git clone https://github.com/seu-usuario/desafio-backend-lu-estilo.git
+cd desafio-backend-lu-estilo
+```
 
-1. Fork este repositório
-2. Crie sua branch (`git checkout -b minha-feature`)
-3. Commit suas mudanças (`git commit -am 'feat: nova feature'`)
-4. Push para a branch (`git push origin minha-feature`)
-5. Abra um Pull Request
+2. Execute com Docker Compose:
+```bash
+docker-compose up --build
+```
 
----
-
-## 📅 Atualizado em
-
-24/05/2025
+3. Acesse a API:
+- http://localhost:8000/docs — Swagger UI
+- http://localhost:8000/redoc — Redoc
 
 ---
