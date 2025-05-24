@@ -140,5 +140,8 @@ Pull requests são bem-vindos! Para melhorias ou correções:
 ## 📅 Atualizado em
 
 24/05/2025
+<<<<<<< HEAD
 
 ---
+=======
+>>>>>>> 86db8b23170d55c4c24d5c28c1fd8387389c6258
