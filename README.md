@@ -19,6 +19,7 @@ API RESTful construída com **FastAPI**, **SQLAlchemy** e **Pydantic v2**, com a
 - [Autenticação](#autenticação)
 - [Endpoints](#endpoints)
 - [Testes](#testes)
+- [🐳 Deploy com Docker](#🐳-deploy-com-docker)
 - [Licença](#licença)
 
 ---
@@ -44,10 +45,14 @@ Este projeto é uma API de controle de clientes, produtos e pedidos para a loja 
 
 ## ⚙️ Como rodar o projeto
 
+> ⚠️ **Importante:** Ao baixar o projeto via GitHub, a pasta geralmente será nomeada como `desafio_backend_lu_estilo-main`.  
+> Renomeie essa pasta para `desafio_lu_estilo` antes de executar os comandos abaixo, pois o `uvicorn` depende desse nome no caminho do módulo.
+
 1. Clone o repositório:
 ```bash
-git clone https://github.com/seu-usuario/desafio-backend-lu-estilo.git
-cd desafio-backend-lu-estilo
+git clone https://github.com/gnery7/desafio_lu_estilo.git
+mv desafio_lu_estilo-main desafio_lu_estilo
+cd desafio_lu_estilo
 ```
 
 2. Crie um ambiente virtual e instale as dependências:
@@ -65,6 +70,7 @@ uvicorn desafio_lu_estilo.main:app --reload
 4. Acesse:
 - http://127.0.0.1:8000/docs — Swagger UI
 - http://127.0.0.1:8000/redoc — Redoc
+- http://127.0.0.1:8000/static/index.html — Teste visual com HTML
 
 ---
 
@@ -129,10 +135,13 @@ Você pode executar o projeto usando **Docker** para facilitar a instalação e 
 
 ### ▶️ Passos para rodar:
 
+> ⚠️ Renomeie a pasta `desafio_backend_lu_estilo-main` para `desafio_lu_estilo` antes de executar o Docker.
+
 1. Clone o repositório:
 ```bash
-git clone https://github.com/seu-usuario/desafio-backend-lu-estilo.git
-cd desafio-backend-lu-estilo
+git clone https://github.com/gnery7/desafio_lu_estilo.git
+mv desafio_lu_estilo-main desafio_lu_estilo
+cd desafio_lu_estilo
 ```
 
 2. Execute com Docker Compose:
@@ -143,5 +152,10 @@ docker-compose up --build
 3. Acesse a API:
 - http://localhost:8000/docs — Swagger UI
 - http://localhost:8000/redoc — Redoc
+- http://localhost:8000/static/index.html — Teste visual com HTML
 
 ---
+
+## 📝 Licença
+
+Este projeto está licenciado sob a licença [MIT](LICENSE).
