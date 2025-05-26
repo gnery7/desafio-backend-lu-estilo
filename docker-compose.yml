@@ -1,11 +1,12 @@
-version: '3.8'
+version: "3.8"
 
 services:
   api:
     build: .
+    container_name: desafio_lu_estilo_api
     ports:
       - "8000:8000"
     volumes:
-      - .:/app
+      - .:/app/desafio_lu_estilo
     environment:
-      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
