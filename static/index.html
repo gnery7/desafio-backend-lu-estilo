@@ -42,6 +42,7 @@
           <input id="product-barcode" placeholder="Código de Barras" class="form-control mb-2" />
           <input id="product-section" placeholder="Seção" class="form-control mb-2" />
           <input id="product-stock" type="number" placeholder="Estoque" class="form-control mb-2" />
+          <input id="product-image" placeholder="URL da Imagem" class="form-control mb-2" />
           <button class="btn btn-warning">Criar Produto</button>
         </form>
         <pre class="mt-3" id="product-log"></pre>
@@ -82,8 +83,36 @@
         <button class="btn btn-dark mb-2" id="list-products-btn">Listar</button>
         <pre class="mt-2" id="list-products-log"></pre>
       </div>
+      <div class="col-md-6">
+        <h4>Filtrar Produtos</h4>
+        <form id="filter-products-form">
+          <input id="filter-section" placeholder="Seção" class="form-control mb-2" />
+          <input id="filter-min-price" type="number" placeholder="Preço mínimo" class="form-control mb-2" />
+          <input id="filter-max-price" type="number" placeholder="Preço máximo" class="form-control mb-2" />
+          <select id="filter-available" class="form-control mb-2">
+            <option value="">Disponibilidade</option>
+            <option value="true">Disponível</option>
+            <option value="false">Indisponível</option>
+          </select>
+          <button class="btn btn-secondary">Filtrar Produtos</button>
+        </form>
+        <pre class="mt-2" id="filter-products-log"></pre>
+      </div>
+
+      <!-- Filtros de pedidos -->
+      <div class="col-md-6">
+        <h4>Filtrar Pedidos</h4>
+        <form id="filter-orders-form">
+          <input id="filter-status" placeholder="Status" class="form-control mb-2" />
+          <input id="filter-client-id" type="number" placeholder="ID do Cliente" class="form-control mb-2" />
+          <input id="filter-date-start" type="date" class="form-control mb-2" />
+          <input id="filter-date-end" type="date" class="form-control mb-2" />
+          <button class="btn btn-secondary">Filtrar Pedidos</button>
+        </form>
+        <pre class="mt-2" id="filter-orders-log"></pre>
+      </div>
+      </div>
     </div>
-  </div>
 
   <script>
     let token = "";
@@ -184,6 +213,62 @@
       const data = await res.json();
       const statusLine = `INFO: 127.0.0.1 - "GET /products/ HTTP/1.1"\n${res.status} ${res.statusText}`;
       document.getElementById("list-products-log").textContent = `${statusLine}\n\n${JSON.stringify(data, null, 2)}`;
+    });
+    document.getElementById("product-form").addEventListener("submit", async e => {
+      e.preventDefault();
+      const body = {
+        description: document.getElementById("product-desc").value,
+        sale_price: parseFloat(document.getElementById("product-price").value),
+        barcode: document.getElementById("product-barcode").value,
+        section: document.getElementById("product-section").value,
+        initial_stock: parseInt(document.getElementById("product-stock").value),
+        image_url: document.getElementById("product-image").value || null
+      };
+      await fetchPost("/products/", body, "product-log");
+    });
+
+    // Filtrar produtos
+    document.getElementById("filter-products-form").addEventListener("submit", async e => {
+      e.preventDefault();
+      const params = new URLSearchParams();
+      const section = document.getElementById("filter-section").value;
+      const minPrice = document.getElementById("filter-min-price").value;
+      const maxPrice = document.getElementById("filter-max-price").value;
+      const available = document.getElementById("filter-available").value;
+
+      if (section) params.append("section", section);
+      if (minPrice) params.append("min_price", minPrice);
+      if (maxPrice) params.append("max_price", maxPrice);
+      if (available) params.append("available", available);
+
+      const res = await fetch(`${API}/products/?${params.toString()}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const data = await res.json();
+      const statusLine = `INFO: 127.0.0.1 - "GET /products/?... HTTP/1.1"\n${res.status} ${res.statusText}`;
+      document.getElementById("filter-products-log").textContent = `${statusLine}\n\n${JSON.stringify(data, null, 2)}`;
+    });
+
+    // Filtrar pedidos
+    document.getElementById("filter-orders-form").addEventListener("submit", async e => {
+      e.preventDefault();
+      const params = new URLSearchParams();
+      const status = document.getElementById("filter-status").value;
+      const clientId = document.getElementById("filter-client-id").value;
+      const dateStart = document.getElementById("filter-date-start").value;
+      const dateEnd = document.getElementById("filter-date-end").value;
+
+      if (status) params.append("status", status);
+      if (clientId) params.append("client_id", clientId);
+      if (dateStart) params.append("date_start", dateStart);
+      if (dateEnd) params.append("date_end", dateEnd);
+
+      const res = await fetch(`${API}/orders/?${params.toString()}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const data = await res.json();
+      const statusLine = `INFO: 127.0.0.1 - "GET /orders/?... HTTP/1.1"\n${res.status} ${res.statusText}`;
+      document.getElementById("filter-orders-log").textContent = `${statusLine}\n\n${JSON.stringify(data, null, 2)}`;
     });
   </script>
 </body>
