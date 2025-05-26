@@ -1,9 +1,20 @@
+from fastapi import Path as PathParam
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from desafio_lu_estilo.database import Base
 from datetime import datetime, timezone
-from pydantic import BaseModel, EmailStr, field_validator, ConfigDict
+from pydantic import BaseModel, EmailStr, field_validator, ConfigDict, Field
+from datetime import datetime, timedelta
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
+from typing import Optional
 import re
+
+SECRET_KEY = "sua_chave_secreta_aqui"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # Modelos ORM (SQLAlchemy)
 class ClientORM(Base):
@@ -22,6 +33,7 @@ class ProductORM(Base):
     section = Column(String)
     initial_stock = Column(Integer)
     expiration_date = Column(DateTime, nullable=True)
+    image_url = Column(String, nullable=True)
 
 class OrderORM(Base):
     __tablename__ = "orders"
@@ -76,12 +88,18 @@ class ProductBase(BaseModel):
     section: str
     initial_stock: int
     expiration_date: datetime | None = None
+    image_url: str | None = None
 
 class ProductCreate(ProductBase):
     pass
 
 class Product(ProductBase):
     id: int
+    model_config = ConfigDict(from_attributes=True)
+
+class OrderProductOut(BaseModel):
+    product_id: int
+    quantity: int
     model_config = ConfigDict(from_attributes=True)
 
 class OrderBase(BaseModel):
@@ -95,8 +113,55 @@ class OrderCreate(OrderBase):
 class Order(OrderBase):
     id: int
     order_date: datetime
+    products: list[OrderProductOut]
     model_config = ConfigDict(from_attributes=True)
 
-class WhatsAppMessage(BaseModel):
-    client_id: int
-    message: str
+class OrderUpdate(BaseModel):
+    status: Optional[str] = None
+    products: Optional[list[int]] = None
+
+class WhatsappMessage(BaseModel):
+    client_id: int = Field(..., description="ID do cliente que receberá a mensagem")
+    message: str = Field(..., description="Conteúdo da mensagem a ser enviada")
+
+class ClientOut(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
+    cpf: str
+    model_config = ConfigDict(from_attributes=True)
+
+class UserORM(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    is_admin = Column(Integer, default=0)
+
+# Esquemas Pydantic
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+    is_admin: bool = False
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class ClientUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    cpf: Optional[str] = None
+
+class ProductUpdate(BaseModel):
+    description: Optional[str] = None
+    sale_price: Optional[float] = None
+    barcode: Optional[str] = None
+    section: Optional[str] = None
+    stock: Optional[int] = None
+    expiration_date: Optional[str] = None
+
+    class Config:
+        from_attributes = True

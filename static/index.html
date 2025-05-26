@@ -5,171 +5,185 @@
   <title>Teste Visual - API Lu Estilo</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="p-5">
-  <h2>Login</h2>
-  <form id="login-form">
-    <input id="username" name="username" placeholder="Usuário" class="form-control mb-2" />
-    <input id="password" name="password" type="password" placeholder="Senha" class="form-control mb-2" />
-    <button type="submit" class="btn btn-primary">Entrar</button>
-  </form>
+<body class="p-4">
+  <div class="container">
+    <h1 class="mb-4">Testes Visuais da API - Lu Estilo</h1>
+    <div class="row g-4">
+      
+      <!-- Login -->
+      <div class="col-md-6">
+        <h4>Login</h4>
+        <form id="login-form">
+          <input id="username" placeholder="Username" class="form-control mb-2" />
+          <input id="password" type="password" placeholder="Password" class="form-control mb-2" />
+          <button class="btn btn-primary">Login</button>
+        </form>
+        <pre class="mt-3" id="login-log"></pre>
+      </div>
 
-  <h4 class="mt-4">Token JWT:</h4>
-  <code id="token-display" class="d-block bg-light p-3 text-break"></code>
+      <!-- Criar Cliente -->
+      <div class="col-md-6">
+        <h4>Criar Cliente</h4>
+        <form id="client-form">
+          <input id="client-name" placeholder="Nome" class="form-control mb-2" />
+          <input id="client-email" placeholder="Email" class="form-control mb-2" />
+          <input id="client-cpf" placeholder="CPF" class="form-control mb-2" />
+          <button class="btn btn-success">Criar Cliente</button>
+        </form>
+        <pre class="mt-3" id="client-log"></pre>
+      </div>
 
-  <hr class="my-5"/>
+      <!-- Criar Produto -->
+      <div class="col-md-6">
+        <h4>Criar Produto</h4>
+        <form id="product-form">
+          <input id="product-desc" placeholder="Nome" class="form-control mb-2" />
+          <input id="product-price" type="number" step="0.01" placeholder="Preço" class="form-control mb-2" />
+          <input id="product-barcode" placeholder="Código de Barras" class="form-control mb-2" />
+          <input id="product-section" placeholder="Seção" class="form-control mb-2" />
+          <input id="product-stock" type="number" placeholder="Estoque" class="form-control mb-2" />
+          <button class="btn btn-warning">Criar Produto</button>
+        </form>
+        <pre class="mt-3" id="product-log"></pre>
+      </div>
 
-  <h2>Criar Cliente</h2>
-  <form id="client-form">
-    <input id="client-name" placeholder="Nome" class="form-control mb-2" />
-    <input id="client-email" type="email" placeholder="Email" class="form-control mb-2" />
-    <input id="client-cpf" placeholder="CPF (11 dígitos)" class="form-control mb-2" />
-    <button type="submit" class="btn btn-success">Criar Cliente</button>
-  </form>
-  <pre class="bg-light p-3 mt-3" id="client-result">-</pre>
+      <!-- Criar Pedido -->
+      <div class="col-md-6">
+        <h4>Criar Pedido</h4>
+        <form id="order-form">
+          <input id="order-client-id" type="number" placeholder="ID do Cliente" class="form-control mb-2" />
+          <input id="order-product-ids" placeholder="IDs dos Produtos (separado por vírgula)" class="form-control mb-2" />
+          <button class="btn btn-info">Criar Pedido</button>
+        </form>
+        <pre class="mt-3" id="order-log"></pre>
+      </div>
 
-  <hr class="my-5"/>
+      <!-- WhatsApp -->
+      <div class="col-md-6">
+        <h4>Enviar Mensagem WhatsApp</h4>
+        <form id="whatsapp-form">
+          <input id="whatsapp-client-id" type="number" placeholder="ID do Cliente" class="form-control mb-2" />
+          <textarea id="whatsapp-message" class="form-control mb-2" placeholder="Mensagem"></textarea>
+          <button class="btn btn-secondary">Enviar</button>
+        </form>
+        <pre class="mt-3" id="whatsapp-log"></pre>
+      </div>
 
-  <h2>Criar Produto</h2>
-  <form id="product-form">
-    <input id="description" placeholder="Descrição" class="form-control mb-2" />
-    <input id="price" type="number" placeholder="Preço" class="form-control mb-2" />
-    <input id="barcode" placeholder="Código de Barras" class="form-control mb-2" />
-    <input id="section" placeholder="Seção" class="form-control mb-2" />
-    <input id="stock" type="number" placeholder="Estoque Inicial" class="form-control mb-2" />
-    <input id="expiration" type="date" class="form-control mb-2" />
-    <button type="submit" class="btn btn-success">Criar Produto</button>
-  </form>
-  <pre class="bg-light p-3 mt-3" id="product-result">-</pre>
+      <!-- Listar Clientes -->
+      <div class="col-md-6">
+        <h4>Listar Clientes</h4>
+        <button class="btn btn-dark mb-2" id="list-clients-btn">Listar</button>
+        <pre class="mt-2" id="list-clients-log"></pre>
+      </div>
 
-  <hr class="my-5"/>
-
-  <h2>Listar Produtos</h2>
-  <button id="list-products" class="btn btn-info mb-2">Listar</button>
-  <pre class="bg-light p-3" id="product-list">-</pre>
-
-  <hr class="my-5"/>
-
-  <h2>Criar Pedido</h2>
-  <form id="order-form">
-    <input id="order-client-id" type="number" placeholder="ID do Cliente" class="form-control mb-2" />
-    <input id="order-product-ids" placeholder="IDs dos Produtos (ex: 1,2)" class="form-control mb-2" />
-    <button type="submit" class="btn btn-success">Criar Pedido</button>
-  </form>
-  <pre class="bg-light p-3 mt-3" id="order-result">-</pre>
-
-  <hr class="my-5"/>
-
-  <h2>Enviar WhatsApp</h2>
-  <form id="whatsapp-form">
-    <input id="whatsapp-client-id" type="number" placeholder="ID do Cliente" class="form-control mb-2" />
-    <textarea id="whatsapp-message" placeholder="Mensagem" class="form-control mb-2"></textarea>
-    <button type="submit" class="btn btn-success">Enviar</button>
-  </form>
-  <pre class="bg-light p-3 mt-3" id="whatsapp-result">-</pre>
+      <!-- Listar Produtos -->
+      <div class="col-md-6">
+        <h4>Listar Produtos</h4>
+        <button class="btn btn-dark mb-2" id="list-products-btn">Listar</button>
+        <pre class="mt-2" id="list-products-log"></pre>
+      </div>
+    </div>
+  </div>
 
   <script>
     let token = "";
-    const API_URL = "http://localhost:8000";
+    const API = "http://localhost:8000";
 
-    function authHeaders() {
-      return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+    function printLog(el, endpoint, res, data) {
+      const statusLine = `INFO: 127.0.0.1 - "POST ${endpoint} HTTP/1.1"\n${res.status} ${res.statusText}`;
+      el.textContent = `${statusLine}\n\n${JSON.stringify(data, null, 2)}`;
     }
 
-    document.getElementById("login-form").addEventListener("submit", async (e) => {
+    async function fetchPost(endpoint, body, logId, useJson = true) {
+      const headers = useJson ? {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      } : { "Content-Type": "application/x-www-form-urlencoded" };
+
+      const res = await fetch(`${API}${endpoint}`, {
+        method: "POST",
+        headers,
+        body: useJson ? JSON.stringify(body) : body
+      });
+
+      const data = await res.json();
+      printLog(document.getElementById(logId), endpoint, res, data);
+      return data;
+    }
+
+    // Login
+    document.getElementById("login-form").addEventListener("submit", async e => {
       e.preventDefault();
       const formData = new URLSearchParams();
       formData.append("username", document.getElementById("username").value);
       formData.append("password", document.getElementById("password").value);
-
-      const res = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: formData
-      });
-
-      const data = await res.json();
-      const statusLine = `INFO:     127.0.0.1 - "POST /auth/login HTTP/1.1" ${res.status} ${res.statusText}`;
-      document.getElementById("token-display").textContent = statusLine;
-
-      if (res.ok && data.access_token) {
-        token = data.access_token;
-        document.getElementById("token-display").textContent += `\n\nTOKEN:\n${token}`;
-      } else {
-        document.getElementById("token-display").textContent += `\n\nErro: ${data.detail || "Falha no login"}`;
-      }
+      const data = await fetchPost("/auth/login", formData, "login-log", false);
+      token = data.access_token || "";
     });
 
-    document.getElementById("client-form").addEventListener("submit", async (e) => {
+    // Cliente
+    document.getElementById("client-form").addEventListener("submit", async e => {
       e.preventDefault();
-      const payload = {
+      const body = {
         name: document.getElementById("client-name").value,
         email: document.getElementById("client-email").value,
         cpf: document.getElementById("client-cpf").value
       };
-      const res = await fetch(`${API_URL}/clients/`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify(payload)
-      });
-      document.getElementById("client-result").textContent = await res.text();
+      await fetchPost("/clients/", body, "client-log");
     });
 
-    document.getElementById("product-form").addEventListener("submit", async (e) => {
+    // Produto
+    document.getElementById("product-form").addEventListener("submit", async e => {
       e.preventDefault();
-      const payload = {
-        description: document.getElementById("description").value,
-        sale_price: parseFloat(document.getElementById("price").value),
-        barcode: document.getElementById("barcode").value,
-        section: document.getElementById("section").value,
-        initial_stock: parseInt(document.getElementById("stock").value),
-        expiration_date: document.getElementById("expiration").value || null
+      const body = {
+        description: document.getElementById("product-desc").value,
+        sale_price: parseFloat(document.getElementById("product-price").value),
+        barcode: document.getElementById("product-barcode").value,
+        section: document.getElementById("product-section").value,
+        initial_stock: parseInt(document.getElementById("product-stock").value)
       };
-      const res = await fetch(`${API_URL}/products/`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify(payload)
-      });
-      document.getElementById("product-result").textContent = await res.text();
+      await fetchPost("/products/", body, "product-log");
     });
 
-    document.getElementById("list-products").addEventListener("click", async () => {
-      const res = await fetch(`${API_URL}/products/?skip=0&limit=10`, {
-        method: "GET",
-        headers: authHeaders()
-      });
-      document.getElementById("product-list").textContent = await res.text();
-    });
-
-    document.getElementById("order-form").addEventListener("submit", async (e) => {
+    // Pedido
+    document.getElementById("order-form").addEventListener("submit", async e => {
       e.preventDefault();
-      const products = document.getElementById("order-product-ids").value
-        .split(",")
-        .map(id => parseInt(id.trim()));
-      const payload = {
+      const ids = document.getElementById("order-product-ids").value
+        .split(",").map(id => parseInt(id.trim()));
+      const body = {
         client_id: parseInt(document.getElementById("order-client-id").value),
         status: "pendente",
-        products
+        products: ids
       };
-      const res = await fetch(`${API_URL}/orders/`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify(payload)
-      });
-      document.getElementById("order-result").textContent = await res.text();
+      await fetchPost("/orders/", body, "order-log");
     });
 
-    document.getElementById("whatsapp-form").addEventListener("submit", async (e) => {
+    // WhatsApp
+    document.getElementById("whatsapp-form").addEventListener("submit", async e => {
       e.preventDefault();
-      const payload = {
+      const body = {
         client_id: parseInt(document.getElementById("whatsapp-client-id").value),
         message: document.getElementById("whatsapp-message").value
       };
-      const res = await fetch(`${API_URL}/whatsapp/send`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify(payload)
+      await fetchPost("/whatsapp/send", body, "whatsapp-log");
+    });
+
+    document.getElementById("list-clients-btn").addEventListener("click", async () => {
+      const res = await fetch(`${API}/clients/?skip=0&limit=100`, {
+        headers: { "Authorization": `Bearer ${token}` }
       });
-      document.getElementById("whatsapp-result").textContent = await res.text();
+      const data = await res.json();
+      const statusLine = `INFO: 127.0.0.1 - "GET /clients/ HTTP/1.1"\n${res.status} ${res.statusText}`;
+      document.getElementById("list-clients-log").textContent = `${statusLine}\n\n${JSON.stringify(data, null, 2)}`;
+    });
+
+    document.getElementById("list-products-btn").addEventListener("click", async () => {
+      const res = await fetch(`${API}/products/?skip=0&limit=100`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const data = await res.json();
+      const statusLine = `INFO: 127.0.0.1 - "GET /products/ HTTP/1.1"\n${res.status} ${res.statusText}`;
+      document.getElementById("list-products-log").textContent = `${statusLine}\n\n${JSON.stringify(data, null, 2)}`;
     });
   </script>
 </body>
