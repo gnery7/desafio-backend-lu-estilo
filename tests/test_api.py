@@ -1,3 +1,4 @@
+# tests/test_api.py
 
 import pytest
 import uuid
@@ -8,13 +9,16 @@ from desafio_lu_estilo.database import Base, engine
 
 client = TestClient(app)
 
+# ------------------------ FIXTURE DE TESTE ------------------------
 @pytest.fixture(scope="module", autouse=True)
 def test_db():
     from desafio_lu_estilo.database import get_db
     from desafio_lu_estilo.auth import get_password_hash
     from desafio_lu_estilo.models import UserORM
+
     Base.metadata.create_all(bind=engine)
     db = next(get_db())
+
     if not db.query(UserORM).filter_by(username="admin").first():
         db_user = UserORM(
             username="admin",
@@ -24,23 +28,24 @@ def test_db():
         )
         db.add(db_user)
         db.commit()
+
     yield
     Base.metadata.drop_all(bind=engine)
 
+# ------------------------ TOKEN ------------------------
 def get_token():
     response = client.post("/auth/login", data={"username": "admin", "password": "admin123"})
     assert response.status_code == 200
     return response.json()["access_token"]
 
-# AUTH
-
+# ------------------------ AUTH ------------------------
 def test_register_user():
     response = client.post("/auth/register", json={
         "username": f"user_{uuid.uuid4().hex[:5]}",
         "email": f"user_{uuid.uuid4().hex[:5]}@email.com",
         "password": "senha123"
     })
-    assert response.status_code in [200, 201, 400]
+    assert response.status_code in [200, 201, 400]  # Pode retornar erro de duplicado
 
 def test_login_user():
     response = client.post("/auth/login", data={"username": "admin", "password": "admin123"})
@@ -52,8 +57,7 @@ def test_refresh_token():
     response = client.post("/auth/refresh-token", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
 
-# CLIENTES
-
+# ------------------------ CLIENTES ------------------------
 def test_create_client():
     token = get_token()
     headers = {"Authorization": f"Bearer {token}"}
@@ -95,8 +99,7 @@ def test_delete_client():
     delete = client.delete(f"/clients/{client_id}", headers=headers)
     assert delete.status_code == 200
 
-# PRODUTOS
-
+# ------------------------ PRODUTOS ------------------------
 def test_create_product():
     token = get_token()
     headers = {"Authorization": f"Bearer {token}"}
@@ -147,17 +150,18 @@ def test_delete_product():
     delete = client.delete(f"/products/{product_id}", headers=headers)
     assert delete.status_code == 200
 
-# PEDIDOS
-
+# ------------------------ PEDIDOS ------------------------
 def test_create_order_with_insufficient_stock():
     token = get_token()
     headers = {"Authorization": f"Bearer {token}"}
+
     client_resp = client.post("/clients/", json={
         "name": "Cliente Estoque",
         "email": f"{uuid.uuid4().hex[:8]}@email.com",
         "cpf": str(int(uuid.uuid4().int) % 10**11).zfill(11)
     }, headers=headers)
     client_id = client_resp.json()["id"]
+
     product_resp = client.post("/products/", json={
         "description": "Produto Sem Estoque",
         "sale_price": 99.99,
@@ -167,49 +171,50 @@ def test_create_order_with_insufficient_stock():
         "expiration_date": None
     }, headers=headers)
     product_id = product_resp.json()["id"]
+
     order = client.post("/orders/", json={
         "client_id": client_id,
         "status": "teste",
         "products": [product_id]
     }, headers=headers)
+
     assert order.status_code == 400
     assert "estoque" in order.json()["detail"].lower()
 
 def test_filter_orders_by_status():
     token = get_token()
     headers = {"Authorization": f"Bearer {token}"}
-    client_resp = client.post("/clients/", json={
+
+    client_id = client.post("/clients/", json={
         "name": "Cliente Teste",
         "email": f"{uuid.uuid4().hex[:8]}@email.com",
         "cpf": str(int(uuid.uuid4().int) % 10**11).zfill(11)
-    }, headers=headers)
-    client_id = client_resp.json()["id"]
-    product_resp = client.post("/products/", json={
+    }, headers=headers).json()["id"]
+
+    product_id = client.post("/products/", json={
         "description": "Produto Teste",
         "sale_price": 20.0,
         "barcode": f"{uuid.uuid4().int % 1000000000000:013}",
         "section": "Filtro",
         "initial_stock": 10,
         "expiration_date": None
-    }, headers=headers)
-    product_id = product_resp.json()["id"]
+    }, headers=headers).json()["id"]
+
     create_order = client.post("/orders/", json={
         "client_id": client_id,
         "status": "filtrar-status",
         "products": [product_id]
     }, headers=headers)
     assert create_order.status_code == 200
+
     response = client.get("/orders/?status=filtrar-status", headers=headers)
     assert response.status_code == 200
-    result = response.json()
-    assert isinstance(result, list)
-    assert any(o["status"] == "filtrar-status" for o in result)
+    assert any(o["status"] == "filtrar-status" for o in response.json())
 
 def test_filter_orders_by_date_range():
     token = get_token()
     headers = {"Authorization": f"Bearer {token}"}
 
-    # Criar cliente e produto
     client_id = client.post("/clients/", json={
         "name": "Cliente Data",
         "email": f"{uuid.uuid4().hex[:8]}@email.com",
@@ -225,7 +230,6 @@ def test_filter_orders_by_date_range():
         "expiration_date": None
     }, headers=headers).json()["id"]
 
-    # Criar pedido com data atual
     client.post("/orders/", json={
         "client_id": client_id,
         "status": "data-range",
@@ -235,14 +239,12 @@ def test_filter_orders_by_date_range():
     today = datetime.utcnow().date().isoformat()
     response = client.get(f"/orders/?start_date={today}&end_date={today}", headers=headers)
     assert response.status_code == 200
-    assert isinstance(response.json(), list)
     assert any("data-range" in o["status"] for o in response.json())
 
 def test_filter_orders_by_product_section():
     token = get_token()
     headers = {"Authorization": f"Bearer {token}"}
 
-    # Criar cliente e produto
     client_id = client.post("/clients/", json={
         "name": "Cliente Seção",
         "email": f"{uuid.uuid4().hex[:8]}@email.com",
@@ -258,7 +260,6 @@ def test_filter_orders_by_product_section():
         "expiration_date": None
     }, headers=headers).json()["id"]
 
-    # Criar pedido
     client.post("/orders/", json={
         "client_id": client_id,
         "status": "seção-filtrar",
@@ -272,8 +273,8 @@ def test_filter_orders_by_product_section():
 def test_create_product_with_image_url():
     token = get_token()
     headers = {"Authorization": f"Bearer {token}"}
-
     image_url = "https://example.com/produto.jpg"
+
     response = client.post("/products/", json={
         "description": "Produto com Imagem",
         "sale_price": 10.0,
