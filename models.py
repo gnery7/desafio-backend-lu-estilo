@@ -1,22 +1,21 @@
-from fastapi import Path as PathParam
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
-from desafio_lu_estilo.database import Base
-from datetime import datetime, timezone
-from pydantic import BaseModel, EmailStr, field_validator, ConfigDict, Field
-from datetime import datetime, timedelta
-from jose import JWTError, jwt
-from passlib.context import CryptContext
-from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 import re
+from fastapi import Path as PathParam, HTTPException, status
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy.orm import relationship, Session
+from pydantic import BaseModel, EmailStr, field_validator, ConfigDict, Field
+from jose import JWTError, jwt
+from passlib.context import CryptContext
 
+from desafio_lu_estilo.database import Base
+
+# ---------------------- CONFIGURAÇÃO JWT ----------------------
 SECRET_KEY = "sua_chave_secreta_aqui"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# Modelos ORM (SQLAlchemy)
+# ---------------------- MODELOS ORM (SQLAlchemy) ----------------------
 class ClientORM(Base):
     __tablename__ = "clients"
     id = Column(Integer, primary_key=True, index=True)
@@ -52,9 +51,23 @@ class OrderProductORM(Base):
     quantity = Column(Integer, default=1)
     order = relationship("OrderORM", back_populates="products")
 
-# Modelos Pydantic (Schemas)
+class UserORM(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    is_admin = Column(Integer, default=0)
+
+# ---------------------- SCHEMAS (Pydantic) ----------------------
 class User(BaseModel):
     username: str
+    password: str
+    is_admin: bool = False
+
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
     password: str
     is_admin: bool = False
 
@@ -77,6 +90,18 @@ class ClientBase(BaseModel):
 class ClientCreate(ClientBase):
     pass
 
+class ClientUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    cpf: Optional[str] = None
+
+class ClientOut(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
+    cpf: str
+    model_config = ConfigDict(from_attributes=True)
+
 class Client(ClientBase):
     id: int
     model_config = ConfigDict(from_attributes=True)
@@ -92,6 +117,17 @@ class ProductBase(BaseModel):
 
 class ProductCreate(ProductBase):
     pass
+
+class ProductUpdate(BaseModel):
+    description: Optional[str] = None
+    sale_price: Optional[float] = None
+    barcode: Optional[str] = None
+    section: Optional[str] = None
+    stock: Optional[int] = None
+    expiration_date: Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 class Product(ProductBase):
     id: int
@@ -110,58 +146,16 @@ class OrderBase(BaseModel):
 class OrderCreate(OrderBase):
     pass
 
+class OrderUpdate(BaseModel):
+    status: Optional[str] = None
+    products: Optional[list[int]] = None
+
 class Order(OrderBase):
     id: int
     order_date: datetime
     products: list[OrderProductOut]
     model_config = ConfigDict(from_attributes=True)
 
-class OrderUpdate(BaseModel):
-    status: Optional[str] = None
-    products: Optional[list[int]] = None
-
 class WhatsappMessage(BaseModel):
     client_id: int = Field(..., description="ID do cliente que receberá a mensagem")
     message: str = Field(..., description="Conteúdo da mensagem a ser enviada")
-
-class ClientOut(BaseModel):
-    id: int
-    name: str
-    email: EmailStr
-    cpf: str
-    model_config = ConfigDict(from_attributes=True)
-
-class UserORM(Base):
-    __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True, nullable=False)
-    email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
-    is_admin = Column(Integer, default=0)
-
-# Esquemas Pydantic
-class UserCreate(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-    is_admin: bool = False
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-class ClientUpdate(BaseModel):
-    name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    cpf: Optional[str] = None
-
-class ProductUpdate(BaseModel):
-    description: Optional[str] = None
-    sale_price: Optional[float] = None
-    barcode: Optional[str] = None
-    section: Optional[str] = None
-    stock: Optional[int] = None
-    expiration_date: Optional[str] = None
-
-    class Config:
-        from_attributes = True

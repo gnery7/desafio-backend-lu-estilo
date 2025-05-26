@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Depends, HTTPException, status, Request, Path as PathParam, Body, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -19,6 +20,7 @@ from desafio_lu_estilo.auth import router as auth_router, get_current_user, get_
 from desafio_lu_estilo.utils import send_whatsapp_message_to
 
 # Logger de erros
+os.makedirs("logs", exist_ok=True)
 log_handler = RotatingFileHandler("logs/error.log", maxBytes=1000000, backupCount=5)
 log_formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
 log_handler.setFormatter(log_formatter)
