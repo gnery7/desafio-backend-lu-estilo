@@ -61,24 +61,24 @@ class UserORM(Base):
 
 # ---------------------- SCHEMAS (Pydantic) ----------------------
 class User(BaseModel):
-    username: str
-    password: str
-    is_admin: bool = False
+    username: str = Field(..., example="usuario123", description="Nome de usuário")
+    password: str = Field(..., example="senha123", description="Senha do usuário")
+    is_admin: bool = Field(False, description="Define se o usuário é administrador")
 
 class UserCreate(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-    is_admin: bool = False
+    username: str = Field(..., example="usuario123", description="Nome de usuário")
+    email: EmailStr = Field(..., example="email@example.com", description="E-mail do usuário")
+    password: str = Field(..., example="senha123", description="Senha do usuário")
+    is_admin: bool = Field(False, description="Define se o usuário é administrador")
 
 class Token(BaseModel):
-    access_token: str
-    token_type: str
+    access_token: str = Field(..., example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+    token_type: str = Field(..., example="bearer")
 
 class ClientBase(BaseModel):
-    name: str
-    email: EmailStr
-    cpf: str
+    name: str = Field(..., example="Maria da Silva", description="Nome completo do cliente")
+    email: EmailStr = Field(..., example="maria@email.com", description="E-mail do cliente")
+    cpf: str = Field(..., example="12345678901", description="CPF com 11 dígitos")
 
     @field_validator("cpf")
     @classmethod
@@ -91,9 +91,9 @@ class ClientCreate(ClientBase):
     pass
 
 class ClientUpdate(BaseModel):
-    name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    cpf: Optional[str] = None
+    name: Optional[str] = Field(None, example="Novo Nome")
+    email: Optional[EmailStr] = Field(None, example="novo@email.com")
+    cpf: Optional[str] = Field(None, example="98765432100")
 
 class ClientOut(BaseModel):
     id: int
@@ -107,24 +107,24 @@ class Client(ClientBase):
     model_config = ConfigDict(from_attributes=True)
 
 class ProductBase(BaseModel):
-    description: str
-    sale_price: float
-    barcode: str
-    section: str
-    initial_stock: int
-    expiration_date: datetime | None = None
-    image_url: str | None = None
+    description: str = Field(..., example="Blusa Feminina", description="Descrição do produto")
+    sale_price: float = Field(..., example=89.90, description="Preço de venda")
+    barcode: str = Field(..., example="7891234567890", description="Código de barras")
+    section: str = Field(..., example="Moda Feminina", description="Seção do produto")
+    initial_stock: int = Field(..., example=10, description="Estoque inicial")
+    expiration_date: datetime | None = Field(None, example="2025-12-31T00:00:00Z", description="Validade (se aplicável)")
+    image_url: str | None = Field(None, example="https://exemplo.com/imagem.jpg", description="URL da imagem do produto")
 
 class ProductCreate(ProductBase):
     pass
 
 class ProductUpdate(BaseModel):
-    description: Optional[str] = None
-    sale_price: Optional[float] = None
-    barcode: Optional[str] = None
-    section: Optional[str] = None
-    stock: Optional[int] = None
-    expiration_date: Optional[str] = None
+    description: Optional[str] = Field(None, example="Novo Produto")
+    sale_price: Optional[float] = Field(None, example=99.90)
+    barcode: Optional[str] = Field(None, example="1234567890123")
+    section: Optional[str] = Field(None, example="Moda Masculina")
+    stock: Optional[int] = Field(None, example=5)
+    expiration_date: Optional[str] = Field(None, example="2025-12-31T00:00:00Z")
 
     class Config:
         from_attributes = True
@@ -134,21 +134,21 @@ class Product(ProductBase):
     model_config = ConfigDict(from_attributes=True)
 
 class OrderProductOut(BaseModel):
-    product_id: int
-    quantity: int
+    product_id: int = Field(..., example=1)
+    quantity: int = Field(..., example=2)
     model_config = ConfigDict(from_attributes=True)
 
 class OrderBase(BaseModel):
-    client_id: int
-    status: str = "pending"
-    products: list[int]
+    client_id: int = Field(..., example=1, description="ID do cliente")
+    status: str = Field("pending", example="pending", description="Status do pedido")
+    products: list[int] = Field(..., example=[1, 2], description="Lista de IDs dos produtos")
 
 class OrderCreate(OrderBase):
     pass
 
 class OrderUpdate(BaseModel):
-    status: Optional[str] = None
-    products: Optional[list[int]] = None
+    status: Optional[str] = Field(None, example="shipped")
+    products: Optional[list[int]] = Field(None, example=[1, 3])
 
 class Order(OrderBase):
     id: int
@@ -157,5 +157,5 @@ class Order(OrderBase):
     model_config = ConfigDict(from_attributes=True)
 
 class WhatsappMessage(BaseModel):
-    client_id: int = Field(..., description="ID do cliente que receberá a mensagem")
-    message: str = Field(..., description="Conteúdo da mensagem a ser enviada")
+    client_id: int = Field(..., description="ID do cliente que receberá a mensagem", example=1)
+    message: str = Field(..., description="Conteúdo da mensagem a ser enviada", example="Olá! Seu produto já está disponível.")

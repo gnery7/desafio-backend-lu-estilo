@@ -30,7 +30,11 @@ logger.addHandler(log_handler)
 
 # Inicialização
 Base.metadata.create_all(bind=engine)
-app = FastAPI(title="API - Lu Estilo", description="API para cadastro de clientes, produtos, pedidos e envio simulado de WhatsApp.", version="1.0.0")
+app = FastAPI(
+    title="API - Lu Estilo",
+    description="API para cadastro de clientes, produtos, pedidos e envio simulado de WhatsApp.",
+    version="1.0.0"
+)
 
 # CORS
 app.add_middleware(
@@ -49,12 +53,12 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 def root():
     return FileResponse(static_dir / "index.html")
 
-@app.get("/health")
+@app.get("/health", tags=["Status"], summary="Health Check")
 def health_check():
     return {"status": "ok"}
 
 # CLIENTES
-@app.post("/clients/", response_model=ClientOut)
+@app.post("/clients/", response_model=ClientOut, tags=["Clientes"], summary="Criar cliente")
 def create_client(client: ClientCreate, db: Session = Depends(get_db), user: UserORM = Depends(get_current_user)):
     if db.query(ClientORM).filter_by(cpf=client.cpf).first():
         raise HTTPException(status_code=400, detail="CPF já cadastrado")
@@ -66,7 +70,7 @@ def create_client(client: ClientCreate, db: Session = Depends(get_db), user: Use
     db.refresh(db_client)
     return ClientOut.model_validate(db_client)
 
-@app.get("/clients/", response_model=list[ClientOut])
+@app.get("/clients/", response_model=list[ClientOut], tags=["Clientes"], summary="Listar clientes")
 def list_clients(skip: int = 0, limit: int = 10, name: str = Query(None), email: str = Query(None), db: Session = Depends(get_db), user: UserORM = Depends(get_current_user)):
     query = db.query(ClientORM)
     if name:
@@ -76,14 +80,14 @@ def list_clients(skip: int = 0, limit: int = 10, name: str = Query(None), email:
     clients = query.offset(skip).limit(limit).all()
     return [ClientOut.model_validate(client) for client in clients]
 
-@app.get("/clients/{client_id}", response_model=ClientOut)
+@app.get("/clients/{client_id}", response_model=ClientOut, tags=["Clientes"], summary="Buscar cliente por ID")
 def get_client_by_id(client_id: int, db: Session = Depends(get_db), user: UserORM = Depends(get_current_user)):
     client = db.query(ClientORM).filter_by(id=client_id).first()
     if not client:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
     return ClientOut.model_validate(client)
 
-@app.put("/clients/{id}", response_model=ClientOut)
+@app.put("/clients/{id}", response_model=ClientOut, tags=["Clientes"], summary="Atualizar cliente")
 def update_client(updated_data: ClientUpdate, id: int = PathParam(gt=0), db: Session = Depends(get_db), user: UserORM = Depends(get_current_user)):
     client = db.query(ClientORM).filter_by(id=id).first()
     if not client:
@@ -97,7 +101,7 @@ def update_client(updated_data: ClientUpdate, id: int = PathParam(gt=0), db: Ses
     db.refresh(client)
     return ClientOut.model_validate(client)
 
-@app.delete("/clients/{id}")
+@app.delete("/clients/{id}", tags=["Clientes"], summary="Deletar cliente")
 def delete_client(id: int, db: Session = Depends(get_db), user: UserORM = Depends(get_current_user)):
     client = db.query(ClientORM).filter_by(id=id).first()
     if not client:
@@ -107,7 +111,7 @@ def delete_client(id: int, db: Session = Depends(get_db), user: UserORM = Depend
     return {"detail": "Cliente deletado com sucesso"}
 
 # PRODUTOS
-@app.post("/products/", response_model=Product)
+@app.post("/products/", response_model=Product, tags=["Produtos"], summary="Criar produto")
 def create_product(product: ProductCreate, db: Session = Depends(get_db), user: UserORM = Depends(get_current_user)):
     db_product = ProductORM(**product.model_dump())
     db.add(db_product)
@@ -115,7 +119,7 @@ def create_product(product: ProductCreate, db: Session = Depends(get_db), user: 
     db.refresh(db_product)
     return Product.model_validate(db_product)
 
-@app.get("/products/", response_model=list[Product])
+@app.get("/products/", response_model=list[Product], tags=["Produtos"], summary="Listar produtos")
 def list_products(skip: int = 0, limit: int = 10, section: str = Query(None), min_price: float = Query(None), max_price: float = Query(None), available: bool = Query(None), db: Session = Depends(get_db), user: UserORM = Depends(get_current_user)):
     query = db.query(ProductORM)
     if section:
@@ -128,14 +132,14 @@ def list_products(skip: int = 0, limit: int = 10, section: str = Query(None), mi
         query = query.filter(ProductORM.initial_stock > 0)
     return [Product.model_validate(p) for p in query.offset(skip).limit(limit).all()]
 
-@app.get("/products/{product_id}", response_model=Product)
+@app.get("/products/{product_id}", response_model=Product, tags=["Produtos"], summary="Buscar produto por ID")
 def get_product_by_id(product_id: int, db: Session = Depends(get_db), user: UserORM = Depends(get_current_user)):
     product = db.query(ProductORM).filter_by(id=product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
     return Product.model_validate(product)
 
-@app.put("/products/{product_id}", response_model=Product)
+@app.put("/products/{product_id}", response_model=Product, tags=["Produtos"], summary="Atualizar produto")
 def update_product(product_id: int, updated_data: ProductUpdate, db: Session = Depends(get_db), user: UserORM = Depends(get_current_user)):
     product = db.query(ProductORM).filter_by(id=product_id).first()
     if not product:
@@ -146,7 +150,7 @@ def update_product(product_id: int, updated_data: ProductUpdate, db: Session = D
     db.refresh(product)
     return Product.model_validate(product)
 
-@app.delete("/products/{product_id}")
+@app.delete("/products/{product_id}", tags=["Produtos"], summary="Deletar produto")
 def delete_product(product_id: int, db: Session = Depends(get_db), user: UserORM = Depends(get_current_user)):
     product = db.query(ProductORM).filter_by(id=product_id).first()
     if not product:
@@ -156,7 +160,7 @@ def delete_product(product_id: int, db: Session = Depends(get_db), user: UserORM
     return {"detail": "Produto deletado com sucesso"}
 
 # PEDIDOS
-@app.post("/orders/", response_model=Order)
+@app.post("/orders/", response_model=Order, tags=["Pedidos"], summary="Criar pedido")
 def create_order(order: OrderCreate, db: Session = Depends(get_db), user: UserORM = Depends(get_current_user)):
     for product_id in order.products:
         product = db.query(ProductORM).filter_by(id=product_id).first()
@@ -178,23 +182,30 @@ def create_order(order: OrderCreate, db: Session = Depends(get_db), user: UserOR
     db.refresh(db_order)
     return Order.model_validate(db_order)
 
-@app.get("/orders/", response_model=list[Order])
-def list_orders(skip: int = 0, limit: int = 10, status: str = Query(None), client_id: int = Query(None), db: Session = Depends(get_db), user: UserORM = Depends(get_current_user)):
+@app.get("/orders/", response_model=list[Order], tags=["Pedidos"], summary="Listar pedidos")
+def list_orders(skip: int = 0, limit: int = 10, status: str = Query(None), client_id: int = Query(None), section: str = Query(None), start_date: str = Query(None), end_date: str = Query(None), db: Session = Depends(get_db), user: UserORM = Depends(get_current_user)):
     query = db.query(OrderORM)
     if status:
         query = query.filter(OrderORM.status.ilike(f"%{status}%"))
     if client_id:
         query = query.filter(OrderORM.client_id == client_id)
-    return [Order.model_validate(p) for p in query.offset(skip).limit(limit).all()]
+    if start_date:
+        query = query.filter(func.date(OrderORM.order_date) >= start_date)
+    if end_date:
+        query = query.filter(func.date(OrderORM.order_date) <= end_date)
+    if section:
+        query = query.join(OrderProductORM).join(ProductORM).filter(ProductORM.section.ilike(f"%{section}%")).distinct()
+    pedidos = query.offset(skip).limit(limit).all()
+    return [Order.model_validate(p) for p in pedidos]
 
-@app.get("/orders/{order_id}", response_model=Order)
+@app.get("/orders/{order_id}", response_model=Order, tags=["Pedidos"], summary="Buscar pedido por ID")
 def get_order_by_id(order_id: int, db: Session = Depends(get_db), user: UserORM = Depends(get_current_user)):
     order = db.query(OrderORM).filter_by(id=order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Pedido não encontrado")
     return Order.model_validate(order)
 
-@app.put("/orders/{order_id}", response_model=Order)
+@app.put("/orders/{order_id}", response_model=Order, tags=["Pedidos"], summary="Atualizar pedido")
 def update_order(order_id: int, updated_data: OrderUpdate = Body(...), db: Session = Depends(get_db), user: UserORM = Depends(get_current_user)):
     order = db.query(OrderORM).filter_by(id=order_id).first()
     if not order:
@@ -209,7 +220,7 @@ def update_order(order_id: int, updated_data: OrderUpdate = Body(...), db: Sessi
     db.refresh(order)
     return Order.model_validate(order)
 
-@app.delete("/orders/{order_id}")
+@app.delete("/orders/{order_id}", tags=["Pedidos"], summary="Deletar pedido")
 def delete_order(order_id: int, db: Session = Depends(get_db), user: UserORM = Depends(get_current_user)):
     order = db.query(OrderORM).filter_by(id=order_id).first()
     if not order:
@@ -220,7 +231,7 @@ def delete_order(order_id: int, db: Session = Depends(get_db), user: UserORM = D
     return {"detail": "Pedido deletado com sucesso"}
 
 # WHATSAPP
-@app.post("/whatsapp/send", response_model=dict)
+@app.post("/whatsapp/send", response_model=dict, tags=["WhatsApp"], summary="Enviar mensagem de WhatsApp")
 def send_whatsapp(message: WhatsappMessage, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     client = db.query(ClientORM).filter_by(id=message.client_id).first()
     if not client:
@@ -233,64 +244,5 @@ async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Erro não tratado: {exc} | Path: {request.url}")
     return JSONResponse(status_code=500, content={"detail": "Erro interno do servidor. A equipe técnica foi notificada."})
 
-@app.get("/orders/", response_model=list[Order])
-def list_orders(
-    skip: int = 0,
-    limit: int = 10,
-    status: str = Query(None),
-    client_id: int = Query(None),
-    section: str = Query(None),
-    start_date: str = Query(None),
-    end_date: str = Query(None),
-    db: Session = Depends(get_db),
-    user: UserORM = Depends(get_current_user)
-) -> list[Order]:
-    query = db.query(OrderORM)
-
-    if status:
-        query = query.filter(OrderORM.status.ilike(f"%{status}%"))
-    if client_id:
-        query = query.filter(OrderORM.client_id == client_id)
-    if start_date:
-        query = query.filter(func.date(OrderORM.order_date) >= start_date)
-    if end_date:
-        query = query.filter(func.date(OrderORM.order_date) <= end_date)
-    if section:
-        query = query.join(OrderProductORM).join(ProductORM).filter(ProductORM.section.ilike(f"%{section}%")).distinct()
-
-    pedidos = query.offset(skip).limit(limit).all()
-    return [Order.model_validate(p) for p in pedidos]
-
-@app.post("/products/", response_model=Product)
-def create_product(product: ProductCreate, db: Session = Depends(get_db), user: UserORM = Depends(get_current_user)) -> Product:
-    db_product = ProductORM(**product.model_dump())
-    db.add(db_product)
-    db.commit()
-    db.refresh(db_product)
-    return Product.model_validate(db_product)
-
-@app.get("/products/", response_model=list[Product])
-def list_products(
-    skip: int = 0,
-    limit: int = 10,
-    section: str = Query(None),
-    min_price: float = Query(None),
-    max_price: float = Query(None),
-    available: bool = Query(None),
-    db: Session = Depends(get_db),
-    user: UserORM = Depends(get_current_user)
-) -> list[Product]:
-    query = db.query(ProductORM)
-    if section:
-        query = query.filter(ProductORM.section.ilike(f"%{section}%"))
-    if min_price is not None:
-        query = query.filter(ProductORM.sale_price >= min_price)
-    if max_price is not None:
-        query = query.filter(ProductORM.sale_price <= max_price)
-    if available:
-        query = query.filter(ProductORM.initial_stock > 0)
-    produtos = query.offset(skip).limit(limit).all()
-    return [Product.model_validate(p) for p in produtos]
-
 # Auth router
-app.include_router(auth_router)
+app.include_router(auth_router, tags=["Autenticação"])
